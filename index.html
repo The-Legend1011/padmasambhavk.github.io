@@ -167,8 +167,190 @@
       </div>
     </section>
 
-    <!-- CASE STUDIES PLACEHOLDER -->
-    <div id="case-studies-anchor"></div>
+<!-- ==========================================
+         PART 3: PRODUCTION CASE STUDIES
+         ========================================== -->
+
+    <!-- CASE STUDY 01: FINAL EXAM PIPELINE -->
+    <h2 class="section-title"><span>// 01</span> DATA GOVERNANCE & IDEMPOTENT WORKFLOWS</h2>
+
+    <div class="case-card">
+      <div class="case-header">
+        <div>
+          <h3>Idempotent Multi-Attempt Intake & State-Tracking Engine</h3>
+          <p style="color:var(--text-muted); font-size:14px; margin-top:4px;">STAENZ Academy Final Certification Pipeline</p>
+        </div>
+        <span class="badge">Fluent Forms • Zoho Flow • Zoho Sheet</span>
+      </div>
+
+      <div class="meta-strip">
+        <div><strong>Primary Mechanism</strong><span>Composite Primary-Key Upsert</span></div>
+        <div><strong>Throughput &amp; Attempts</strong><span>3 Strict Attempts Enforced</span></div>
+        <div><strong>Audit Accuracy</strong><span>100% (0 Duplicate Rows)</span></div>
+        <div><strong>Manual Overhead</strong><span>Reduced to 0 Human Hours</span></div>
+      </div>
+
+      <div class="grid-2col">
+        <div class="content-block">
+          <h4>The Operational Bottleneck</h4>
+          <p>Students are strictly permitted up to three attempts to pass their certification exam. Under default form configurations, every single submission generated an isolated ticket and database entry. This inundated the administrative database with duplicate rows, fragmented exam histories, and forced evaluators to manually cross-reference timestamps and calculate attempt counts before issuing certificates.</p>
+        </div>
+        <div class="content-block">
+          <h4>Engineered Solution &amp; Logic</h4>
+          <ul>
+            <li><strong>Ingestion:</strong> Student submission in Fluent Forms triggers a Fluent Support ticket event that fires an asynchronous webhook to Zoho Flow.</li>
+            <li><strong>State Verification:</strong> Zoho Flow queries the central certification database using normalized student identifiers (lowercased, trimmed email).</li>
+            <li><strong>In-Place Upsert:</strong> Attempt 1 creates the master record; attempts 2 &amp; 3 execute an in-place update on the <em>same</em> row (updating sequential attempt scores without creating new entries).</li>
+            <li><strong>Fail-Safe Lockout:</strong> Attempts &ge; 4 automatically trigger a limit exception, locking the record from overwrites and firing a triage payload to Zoho Cliq.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="screenshot-box">
+        <div class="screenshot-caption">// ARCHITECTURE FLOW: FLUENT FORMS → FLUENT SUPPORT → ZOHO FLOW → SINGLE-ROW DATABASE UPSERT</div>
+      </div>
+    </div>
+
+    <!-- CASE STUDY 02: GTM 1st-PARTY COOKIE BEHAVIORAL PRICING -->
+    <h2 class="section-title"><span>// 02</span> CLIENT-SIDE TELEMETRY &amp; BEHAVIORAL CRO</h2>
+
+    <div class="case-card">
+      <div class="case-header">
+        <div>
+          <h3>1st-Party Cookie Session Engine &amp; Dynamic DOM Scarcity</h3>
+          <p style="color:var(--text-muted); font-size:14px; margin-top:4px;">GTM Container: GTM-MQ9R3KSL (Version 6 Production)</p>
+        </div>
+        <span class="badge">Google Tag Manager • Custom JS • DOM API</span>
+      </div>
+
+      <div class="meta-strip">
+        <div><strong>State Identifier</strong><span>1st-Party Cookie (staenz_pv_count)</span></div>
+        <div><strong>Cookie Lifecycle</strong><span>24-Hour Rolling Expiry</span></div>
+        <div><strong>Price Escalation</strong><span>+10% Dynamic DOM Math</span></div>
+        <div><strong>Vendor Trigger</strong><span>Tawk_API.maximize() at PV &gt; 3</span></div>
+      </div>
+
+      <div class="grid-2col">
+        <div class="content-block">
+          <h4>Telemetry Architecture</h4>
+          <p>Engineered client-side session-depth tracking using a first-party cookie variable (<code>staenz_pv_count</code>). Rather than burdening backend server resources with session lookups, Google Tag Manager evaluates browser interaction depth at <code>DOM Ready</code> and executes tailored conversion optimization actions in real time.</p>
+        </div>
+        <div class="content-block">
+          <h4>Programmatic Trigger Conditions</h4>
+          <ul>
+            <li><strong>Intent Milestone 1 (PV &gt; 3):</strong> Window Loaded trigger detects high intent and executes <code>Tawk_API.maximize()</code> to proactively surface live support assistance.</li>
+            <li><strong>Intent Milestone 2 (PV &gt; 6):</strong> Custom JS scans the WooCommerce product node (<code>.summary .price</code>), strips non-numeric currency artifacts, calculates a +10% price escalation, and repopulates the DOM while preserving the currency symbol wrapper.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Real Code Snippet from your Task -->
+      <div class="code-window">
+        <div class="code-header">GTM Custom HTML Tag: HTML - Increase Price 10% (Live Production Script)</div>
+<pre><code><span class="code-comment">// 1. Isolate and hide original strikethrough price element</span>
+<span class="code-keyword">var</span> regularPrice = document.<span class="code-function">querySelector</span>(<span class="code-string">'.summary .price del'</span>);
+<span class="code-keyword">if</span> (regularPrice) { regularPrice.style.display = <span class="code-string">'none'</span>; }
+
+<span class="code-comment">// 2. Parse WooCommerce price element and isolate currency symbol</span>
+<span class="code-keyword">var</span> priceElements = document.<span class="code-function">querySelectorAll</span>(<span class="code-string">'.summary .price .woocommerce-Price-amount bdi'</span>);
+<span class="code-keyword">if</span> (priceElements.length > <span class="code-var">0</span>) {
+    <span class="code-keyword">var</span> activePrice = priceElements[priceElements.length - <span class="code-var">1</span>];
+    <span class="code-keyword">var</span> symbolSpan = activePrice.<span class="code-function">querySelector</span>(<span class="code-string">'.woocommerce-Price-currencySymbol'</span>);
+    <span class="code-keyword">var</span> symbol = symbolSpan ? symbolSpan.innerText : <span class="code-string">''</span>;
+
+    <span class="code-comment">// 3. Calculate dynamic +10% price escalation</span>
+    <span class="code-keyword">var</span> numericPrice = <span class="code-function">parseFloat</span>(activePrice.innerText.<span class="code-function">replace</span>(<span class="code-string">/[^0-9.]/g</span>, <span class="code-string">''</span>));
+    <span class="code-keyword">if</span> (!<span class="code-function">isNaN</span>(numericPrice)) {
+        <span class="code-keyword">var</span> newPrice = (numericPrice * <span class="code-var">1.10</span>).<span class="code-function">toFixed</span>(<span class="code-var">2</span>);
+        activePrice.innerHTML = <span class="code-string">'&lt;span class="woocommerce-Price-currencySymbol"&gt;'</span> + symbol + <span class="code-string">'&lt;/span&gt;'</span> + newPrice;
+    }
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- CASE STUDY 03: BIGIN REAL-TIME LIFECYCLE PIPELINE -->
+    <h2 class="section-title"><span>// 03</span> CRM LIFECYCLE &amp; MULTI-STAGE MESSAGING</h2>
+
+    <div class="case-card">
+      <div class="case-header">
+        <div>
+          <h3>Real-Time Stage Orchestration &amp; Cloud API Delivery</h3>
+          <p style="color:var(--text-muted); font-size:14px; margin-top:4px;">Zoho Bigin ATC Stage $\rightarrow$ Zoho Flow $\rightarrow$ AiSensy WhatsApp API</p>
+        </div>
+        <span class="badge">Zoho Bigin • Custom Deluge • Meta Cloud API</span>
+      </div>
+
+      <div class="meta-strip">
+        <div><strong>Active State Trigger</strong><span>Attempted to Contact (ATC)</span></div>
+        <div><strong>Processing Latency</strong><span>&lt; 2.0s Real-Time Dispatch</span></div>
+        <div><strong>Data Sanitization</strong><span>Custom Deluge E.164 Normalization</span></div>
+        <div><strong>Delivery Channel</strong><span>Meta-Approved WhatsApp Templates</span></div>
+      </div>
+
+      <div class="grid-2col">
+        <div class="content-block">
+          <h4>The Core Problem</h4>
+          <p>When sales and enrollment reps transition prospect stages to "Attempted to Contact" (ATC) after an unanswered call, manual outreach delays stretch to hours. Standard email notifications suffer from abysmal open rates (&lt;20%), causing high lead decay and wasted acquisition spend.</p>
+        </div>
+        <div class="content-block">
+          <h4>Architectural Implementation</h4>
+          <p>Engineered an event-driven automation in Zoho Flow monitoring real-time stage updates. Upon transition to ATC, a custom Deluge script normalizes contact numbers to international E.164 format and pushes an authenticated JSON payload to AiSensy's WhatsApp Cloud API within seconds, prompting prospects to reschedule immediately.</p>
+        </div>
+      </div>
+
+      <div class="code-window">
+        <div class="code-header">Deluge Script: ParseMobileForAiSensy (String Cleansing &amp; Formatting)</div>
+<pre><code><span class="code-comment">// Strip all non-numeric characters from incoming user payloads</span>
+clean_digits = raw_phone.<span class="code-function">replaceAll</span>(<span class="code-string">"[^0-9]"</span>, <span class="code-string">""</span>);
+
+<span class="code-comment">// Normalize 10-digit Indian numbers to E.164 format</span>
+<span class="code-keyword">if</span> (clean_digits.<span class="code-function">length</span>() == <span class="code-var">10</span>) {
+    <span class="code-keyword">return</span> <span class="code-string">"91"</span> + clean_digits;
+}
+<span class="code-comment">// Strip leading zero from 11-digit entries</span>
+<span class="code-keyword">else if</span> (clean_digits.<span class="code-function">length</span>() == <span class="code-var">11</span> &amp;&amp; clean_digits.<span class="code-function">startsWith</span>(<span class="code-string">"0"</span>)) {
+    <span class="code-keyword">return</span> <span class="code-string">"91"</span> + clean_digits.<span class="code-function">subString</span>(<span class="code-var">1</span>, <span class="code-var">11</span>);
+}
+<span class="code-keyword">return</span> clean_digits;</code></pre>
+      </div>
+    </div>
+
+    <!-- CASE STUDY 04: UNSTRUCTURED CONTENT TO AI TAXONOMY PIPELINE -->
+    <h2 class="section-title"><span>// 04</span> APPLIED AI &amp; CONTENT INGESTION PIPELINES</h2>
+
+    <div class="case-card">
+      <div class="case-header">
+        <div>
+          <h3>Automated Video Transcript Taxonomy &amp; LMS Naming Engine</h3>
+          <p style="color:var(--text-muted); font-size:14px; margin-top:4px;">Zoom Cloud $\rightarrow$ Webhook $\rightarrow$ LLM Inference $\rightarrow$ LMS API</p>
+        </div>
+        <span class="badge">Python • Webhooks • Groq LPU • LMS REST API</span>
+      </div>
+
+      <div class="meta-strip">
+        <div><strong>Raw Ingestion</strong><span>Zoom Cloud Meeting Transcripts</span></div>
+        <div><strong>AI Engine</strong><span>LLM Semantic Topic Extraction</span></div>
+        <div><strong>Inference Runtime</strong><span>&lt; 500ms Token Generation</span></div>
+        <div><strong>Operational Impact</strong><span>100% Manual Tagging Labor Eliminated</span></div>
+      </div>
+
+      <div class="grid-2col">
+        <div class="content-block">
+          <h4>The Operational Bottleneck</h4>
+          <p>Dozens of hours of daily training and cohort recordings generated large volumes of unorganized, generic recording files (e.g., <code>Recording_09_10.mp4</code>). Finding specific curriculum topics, technical modules, and doubt resolutions in the LMS was nearly impossible without hours of manual review and tagging.</p>
+        </div>
+        <div class="content-block">
+          <h4>The Automated AI Architecture</h4>
+          <ul>
+            <li><strong>Trigger:</strong> Meeting recording completion event sends transcript payload to an ingestion webhook.</li>
+            <li><strong>Semantic Parsing:</strong> LLM analyzes full session dialog, filtering noise and extracting core subtopics and key tools taught.</li>
+            <li><strong>Automated Indexing:</strong> The pipeline formats a clean, standardized title and pushes update payloads to the LMS API for instant student discoverability.</li>
+            <li><strong>Operational Companion:</strong> Deployed a dedicated Telegram RAG Bot (Python + Groq LPU + <code>Knowledge_Base.json</code>) on PythonAnywhere to deflect 80%+ of student administrative inquiries around course links and exams.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
 
   </div>
 </body>
